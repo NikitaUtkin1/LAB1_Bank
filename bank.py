@@ -1,16 +1,20 @@
 import json
 import xml.etree.ElementTree as et
 
+
+# Создаем собственное исключение для ошибок, связанных с деньгами
 class NoMoneyError(Exception):
     pass
 
 
+# Информация о клиентах
 class Client:
     def __init__(self, name, client_id):
         self.name = name
         self.client_id = client_id
 
 
+# История операций
 class Transaction:
     def __init__(self, account_number, amount, kind):
         self.account_number = account_number
@@ -18,10 +22,12 @@ class Transaction:
         self.kind = kind  # "deposit" или "withdraw"
 
 
+# Базовый класс
 class Account:
-    def __init__(self, number: str , balance: float = 0):
+    def __init__(self, number: str, balance: float = 0):
         self.number: str = number
         self.balance: float = balance
+
     def deposit(self, amount):
         if amount <= 0:
             raise ValueError("Сумма не может быть меньше нуля")
@@ -35,18 +41,20 @@ class Account:
         self.balance -= amount
 
 
+# Сберегательный счет
 class SavingsAccount(Account):
-    def __init__(self, number , balance=0, perc=0.05):
-        super().__init__(number , balance)
-        self.perc=perc
+    def __init__(self, number, balance=0, perc=0.05):
+        super().__init__(number, balance)
+        self.perc = perc
 
     def add_interest(self):
         self.balance += self.balance * self.perc
 
 
+# Основной счет
 class CheckingAccount(Account):
-    def __init__(self, number , balance=0, limit=500):
-        super().__init__(number , balance)
+    def __init__(self, number, balance=0, limit=500):
+        super().__init__(number, balance)
         self.limit = limit
 
     def withdraw(self, amount):
@@ -54,6 +62,8 @@ class CheckingAccount(Account):
             raise ValueError("Превышен лимит")
         self.balance -= amount
 
+
+# Кредитный счет
 class CreditAccount(Account):
     def __init__(self, number, balance=0, credit_limit=1000):
         super().__init__(number, balance)
@@ -64,28 +74,34 @@ class CreditAccount(Account):
             raise NoMoneyError("Превышен кредитный лимит")
         self.balance -= amount
 
+
+# Класс банка
 class Bank:
     def __init__(self):
         self.accounts = []
         self.transactions = []
 
+    # Добавление нового счета
     def add(self, account):
         self.accounts.append(account)
 
+    # Поиск счета
     def find(self, number):
         for account in self.accounts:
             if account.number == number:
                 return account
         raise LookupError("Аккаунт не найден")
 
+    # Удаление счета
     def remove(self, number):
-        # Удаление счёта
-        acc = self.find(number)  # кинет LookupError, если нет
+        acc = self.find(number)
         self.accounts.remove(acc)
 
+    # Запись в историю
     def log(self, account_number, amount, kind):
         self.transactions.append(Transaction(account_number, amount, kind))
 
+    # Сохранение в json
     def save_json(self, filename):
         data = []
         for acc in self.accounts:
@@ -97,9 +113,11 @@ class Bank:
             elif type(acc).__name__ == "CreditAccount":
                 item["credit_limit"] = acc.credit_limit
             data.append(item)
+        # Записываем список словарей в файл
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
+    # Загрузка из json
     def load_json(self, filename):
         with open(filename, encoding="utf-8") as f:
             data = json.load(f)
@@ -115,10 +133,11 @@ class Bank:
                 acc = Account(item["number"], item["balance"])
             self.accounts.append(acc)
 
-    # --- XML ---
+    # Сохранение в xml
     def save_xml(self, filename):
         root = et.Element("Bank")
         for acc in self.accounts:
+            # Создаем тег и сохраняем в атрибут тип класса
             a = et.SubElement(root, "Account", type=type(acc).__name__)
             et.SubElement(a, "Number").text = acc.number
             et.SubElement(a, "Balance").text = str(acc.balance)
@@ -128,8 +147,10 @@ class Bank:
                 et.SubElement(a, "Limit").text = str(acc.limit)
             if isinstance(acc, CreditAccount):
                 et.SubElement(a, "CreditLimit").text = str(acc.credit_limit)
+        # Сохраняем дерево в файл
         et.ElementTree(root).write(filename, encoding="utf-8", xml_declaration=True)
 
+    # Загрузка из xml
     def load_xml(self, filename):
         root = et.parse(filename).getroot()
         self.accounts = []
@@ -148,6 +169,7 @@ class Bank:
             self.accounts.append(acc)
 
 
+# Тесты
 if __name__ == "__main__":
     bank = Bank()
 
@@ -166,19 +188,19 @@ if __name__ == "__main__":
         bank.log("C1", 100, "deposit")
         bank.find("S1").withdraw(123456)  # сработает NoMoneyError
     except NoMoneyError as e:
-        print("Свое исключение",e)
+        print("Свое исключение", e)
     except LookupError as e:
-        print("Не найден счет",e)
+        print("Не найден счет", e)
     except ValueError as e:
-        print("Сумма указана неверно",e)
+        print("Сумма указана неверно", e)
     try:
         bank.find("CR1").withdraw(999999)  # сработает NoMoneyError
     except NoMoneyError as e:
-        print("Кредитный счёт:", e)
+        print("Ошибка кредита:", e)
 
     print("Транзакций:", len(bank.transactions))
 
-    # Демонстрация Delete из CRUD
+    # Демонстрация Delete
     bank.add(Account("TEMP1", 50))
     print("Счетов до удаления:", len(bank.accounts))
     bank.remove("TEMP1")
