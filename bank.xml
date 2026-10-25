@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Bank><Account type="SavingsAccount"><Number>S1</Number><Balance>700</Balance><Rate>0.5</Rate></Account><Account type="CheckingAccount"><Number>C1</Number><Balance>600</Balance><Limit>200</Limit></Account><Account type="CreditAccount"><Number>CR1</Number><Balance>0</Balance><CreditLimit>5000</CreditLimit></Account></Bank>

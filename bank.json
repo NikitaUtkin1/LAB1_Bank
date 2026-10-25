@@ -1,0 +1,20 @@
+[
+  {
+    "type": "SavingsAccount",
+    "number": "S1",
+    "balance": 700,
+    "rate": 0.5
+  },
+  {
+    "type": "CheckingAccount",
+    "number": "C1",
+    "balance": 600,
+    "limit": 200
+  },
+  {
+    "type": "CreditAccount",
+    "number": "CR1",
+    "balance": 0,
+    "credit_limit": 5000
+  }
+]
