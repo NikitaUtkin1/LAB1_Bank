@@ -2,13 +2,13 @@
   {
     "type": "SavingsAccount",
     "number": "S1",
-    "balance": 700,
-    "rate": 0.5
+    "balance": 500,
+    "rate": 0.1
   },
   {
     "type": "CheckingAccount",
     "number": "C1",
-    "balance": 600,
+    "balance": 800,
     "limit": 200
   },
   {
